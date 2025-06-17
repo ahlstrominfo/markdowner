@@ -1,0 +1,11 @@
+# Local development environment variables
+# This file should be gitignored and not committed to your repository
+# Copy this to .dev.vars and replace with your actual values
+
+# KV Namespace IDs for local development
+KV_NAMESPACE_ID=your-local-kv-namespace-id-here
+PREVIEW_KV_NAMESPACE_ID=your-local-preview-kv-namespace-id-here
+
+# Add other sensitive environment variables here
+# API_KEY=your-api-key-here
+# SECRET_TOKEN=your-secret-token-here

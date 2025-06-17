@@ -74,6 +74,8 @@ You can easily self-host this modernized version. You'll need the [Workers paid 
 
 ### Setup
 
+**This project follows the standard template approach for handling sensitive configuration in public repositories.**
+
 1. **Clone this modernized fork:**
    ```bash
    git clone https://github.com/ahlstrominfo/markdowner
@@ -85,18 +87,77 @@ You can easily self-host this modernized version. You'll need the [Workers paid 
    npm install
    ```
 
-3. **Create KV namespaces:**
+3. **Create your KV namespaces:**
    ```bash
-   npm run kv:create
+   # Create production KV namespace
+   npx wrangler kv namespace create md_cache
+   
+   # Create preview KV namespace
    npx wrangler kv namespace create md_cache --preview
+   
+   # For development environment
+   npx wrangler kv namespace create md_cache_dev
+   npx wrangler kv namespace create md_cache_dev --preview
    ```
 
-4. **Update wrangler.json with your KV namespace IDs**
-
-5. **Deploy:**
+4. **Create your configuration:**
    ```bash
-   npm run deploy
+   # Copy the example configuration
+   cp wrangler.example.json wrangler.json
    ```
+   
+   Then edit `wrangler.json` and replace the placeholder values with your actual KV namespace IDs from step 3:
+   ```json
+   {
+     "kv_namespaces": [
+       {
+         "binding": "MD_CACHE",
+         "id": "your-actual-kv-namespace-id",
+         "preview_id": "your-actual-preview-kv-namespace-id"
+       }
+     ],
+     "env": {
+       "production": {
+         "kv_namespaces": [
+           {
+             "binding": "MD_CACHE",
+             "id": "your-production-kv-namespace-id",
+             "preview_id": "your-production-preview-kv-namespace-id"
+           }
+         ]
+       }
+     }
+   }
+   ```
+
+5. **Set up local development variables (optional):**
+   ```bash
+   # Copy the example file
+   cp .dev.vars.example .dev.vars
+   
+   # Edit .dev.vars with any local development secrets
+   # (This file is gitignored and won't be committed)
+   ```
+
+6. **Development and deployment:**
+   ```bash
+   # Local development
+   npm run dev
+   
+   # Deploy to default environment
+   npm run deploy
+   
+   # Deploy to production environment
+   npx wrangler deploy --env production
+   ```
+
+#### Security Notes
+
+- ✅ **Safe for public repos**: `wrangler.example.json` contains placeholder values (committed)
+- 🔒 **Your config**: `wrangler.json` contains your real IDs (gitignored)
+- 🔒 **Local secrets**: Use `.dev.vars` for local development secrets (gitignored) 
+- 🏭 **Production secrets**: Use `wrangler secret put` for production secrets
+- 🔄 **Environment isolation**: Production uses separate KV namespaces via environments
 
 ### Development
 

@@ -17,8 +17,8 @@
 	"kv_namespaces": [
 		{
 			"binding": "MD_CACHE",
-			"id": "04cf1c6aa50243819dee776db0d3f4cd",
-			"preview_id": "45f1a63160b4402b80ec3bf44662bff9"
+			"id": "YOUR_KV_NAMESPACE_ID_HERE",
+			"preview_id": "YOUR_PREVIEW_KV_NAMESPACE_ID_HERE"
 		}
 	],
 	"unsafe": {
