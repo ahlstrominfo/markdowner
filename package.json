@@ -1,16 +1,24 @@
 {
-	"name": "browser-rendering",
-	"version": "0.0.0",
+	"name": "markdowner",
+	"version": "1.0.0",
 	"private": true,
 	"scripts": {
+		"dev": "wrangler dev --remote",
 		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"deploy:staging": "wrangler deploy --env staging",
+		"start": "wrangler dev --remote",
+		"types": "wrangler types",
+		"cf-typegen": "wrangler types",
+		"logs": "wrangler tail",
+		"kv:create": "wrangler kv namespace create md_cache",
+		"lint": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20240502.0",
-		"typescript": "^5.0.4",
-		"wrangler": "^3.53.1"
+		"@types/node": "^24.0.3",
+		"typescript": "^5.7.2",
+		"wrangler": "^4.20.1"
+	},
+	"dependencies": {
+		"@cloudflare/puppeteer": "^1.0.2"
 	}
 }

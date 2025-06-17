@@ -1,24 +1,38 @@
 import puppeteer from '@cloudflare/puppeteer';
-import { Tweet } from 'react-tweet/api';
 import { html } from './response';
 
+interface Tweet {
+	id_str: string;
+	text: string;
+	user?: {
+		name?: string;
+		screen_name?: string;
+	};
+	created_at: string;
+	favorite_count: number;
+	conversation_count: number;
+	photos?: { url: string }[];
+}
+
 export default {
-	async fetch(request: Request, env: Env) {
+	async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
 		const ip = request.headers.get('cf-connecting-ip');
-		if (!(env.BACKEND_SECURITY_TOKEN === request.headers.get('Authorization')?.replace('Bearer ', ''))) {
-			const { success } = await env.RATELIMITER.limit({ key: ip });
+		const authToken = request.headers.get('Authorization')?.replace('Bearer ', '') || '';
+		
+		if (authToken !== env.BACKEND_SECURITY_TOKEN) {
+			const { success } = await env.RATELIMITER.limit({ key: ip || '' });
 
 			if (!success || request.url.includes('poemanalysis')) {
 				return new Response('Rate limit exceeded', { status: 429 });
 			}
 		}
 
-		const id = env.BROWSER.idFromName('browser');
-		const obj = env.BROWSER.get(id);
+		const id = env.BROWSER_DO.idFromName('browser');
+		const obj = env.BROWSER_DO.get(id);
 		const resp = await obj.fetch(request.url, { headers: request.headers });
 		return resp;
 	},
-};
+} satisfies ExportedHandler<Env>;
 
 const KEEP_BROWSER_ALIVE_IN_SECONDS = 60;
 const TEN_SECONDS = 10000;
@@ -28,7 +42,7 @@ export class Browser {
 	env: Env;
 	keptAliveInSeconds: number;
 	storage: DurableObjectStorage;
-	browser: puppeteer.Browser | undefined;
+	browser: puppeteer.Browser | null = null;
 	request: Request | undefined;
 	llmFilter: boolean;
 	token = '';
@@ -42,7 +56,7 @@ export class Browser {
 		this.llmFilter = false;
 	}
 
-	async fetch(request: Request) {
+	async fetch(request: Request): Promise<Response> {
 		this.request = request;
 
 		if (!(request.method === 'GET')) {
@@ -80,12 +94,12 @@ export class Browser {
 			: this.processSinglePage(url, enableDetailedResponse, contentType);
 	}
 
-	async ensureBrowser() {
+	async ensureBrowser(): Promise<boolean> {
 		let retries = 3;
-		while (retries) {
+		while (retries > 0) {
 			if (!this.browser || !this.browser.isConnected()) {
 				try {
-					this.browser = await puppeteer.launch(this.env.MYBROWSER);
+					this.browser = await puppeteer.launch(this.env.BROWSER);
 					return true;
 				} catch (e) {
 					console.error(`Browser DO: Could not start browser instance. Error: ${e}`);
@@ -94,10 +108,10 @@ export class Browser {
 						return false;
 					}
 
-					const sessions = await puppeteer.sessions(this.env.MYBROWSER);
+					const sessions = await puppeteer.sessions(this.env.BROWSER);
 
 					for (const session of sessions) {
-						const b = await puppeteer.connect(this.env.MYBROWSER, session.sessionId);
+						const b = await puppeteer.connect(this.env.BROWSER, session.sessionId);
 						await b.close();
 					}
 
@@ -107,12 +121,13 @@ export class Browser {
 				return true;
 			}
 		}
+		return false;
 	}
 
-	async crawlSubpages(baseUrl: string, enableDetailedResponse: boolean, contentType: string) {
+	async crawlSubpages(baseUrl: string, enableDetailedResponse: boolean, _contentType: string) {
 		const page = await this.browser!.newPage();
 		await page.goto(baseUrl);
-		const links = await this.extractLinks(page, baseUrl);
+		const links = await this.extractLinks(page, baseUrl) as string[];
 		await page.close();
 
 		const uniqueLinks = Array.from(new Set(links)).splice(0, 10);
@@ -145,14 +160,14 @@ export class Browser {
 			}
 			return new Response(JSON.stringify(md), { status: status });
 		} else {
-			return new Response(md[0].md, {
-				status: md[0].md === 'Rate limit exceeded' ? 429 : 200,
+			return new Response(md[0]?.md || '', {
+				status: md[0]?.md === 'Rate limit exceeded' ? 429 : 200,
 			});
 		}
 	}
 
-	async extractLinks(page: puppeteer.Page, baseUrl: string) {
-		return await page.evaluate((baseUrl) => {
+	async extractLinks(page: puppeteer.Page, baseUrl: string): Promise<string[]> {
+		return await page.evaluate((baseUrl: string) => {
 			return Array.from(document.querySelectorAll('a'))
 				.map((link) => (link as { href: string }).href)
 				.filter((link) => link.startsWith(baseUrl));
@@ -201,7 +216,7 @@ export class Browser {
 
 		return await Promise.all(
 			urls.map(async (url) => {
-				const ip = this.request?.headers.get('cf-connecting-ip');
+				const ip = this.request?.headers.get('cf-connecting-ip') || '';
 
 				if (this.token !== env.BACKEND_SECURITY_TOKEN) {
 					const { success } = await env.RATELIMITER.limit({ key: ip });
@@ -242,7 +257,7 @@ export class Browser {
 				let md = cached ?? (await classThis.fetchAndProcessPage(url, enableDetailedResponse));
 
 				if (this.llmFilter && !cached) {
-					for (let i = 0; i < 60; i++) await env.RATELIMITER.limit({ key: ip });
+					for (let i = 0; i < 60; i++) await env.RATELIMITER.limit({ key: ip || '' });
 
 					const answer = (await env.AI.run('@cf/qwen/qwen1.5-14b-chat-awq', {
 						prompt: `You are an AI assistant that converts webpage content to markdown while filtering out unnecessary information. Please follow these guidelines:
@@ -267,7 +282,7 @@ Output:\`\`\`markdown\n`,
 	async fetchAndProcessPage(url: string, enableDetailedResponse: boolean): Promise<string> {
 		const page = await this.browser!.newPage();
 		await page.goto(url, { waitUntil: 'networkidle0' });
-		const md = await page.evaluate((enableDetailedResponse) => {
+		const md = await page.evaluate((enableDetailedResponse: boolean) => {
 			function extractArticleMarkdown() {
 				const readabilityScript = document.createElement('script');
 				readabilityScript.src = 'https://unpkg.com/@mozilla/readability/Readability.js';
@@ -327,14 +342,14 @@ Output:\`\`\`markdown\n`,
 		return /^(http|https):\/\/[^ "]+$/.test(url);
 	}
 
-	async alarm() {
+	async alarm(): Promise<void> {
 		this.keptAliveInSeconds += 10;
 		if (this.keptAliveInSeconds < KEEP_BROWSER_ALIVE_IN_SECONDS) {
 			await this.storage.setAlarm(Date.now() + TEN_SECONDS);
 		} else {
 			if (this.browser) {
 				await this.browser.close();
-				this.browser = undefined;
+				this.browser = null;
 			}
 		}
 	}

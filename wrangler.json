@@ -1,0 +1,46 @@
+{
+	"name": "markdowner",
+	"main": "src/index.ts",
+	"compatibility_date": "2024-06-17",
+	"compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+	"browser": {
+		"binding": "BROWSER"
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "BROWSER_DO",
+				"class_name": "Browser"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "MD_CACHE",
+			"id": "3186489f943d409a9b772d876a58a73e",
+			"preview_id": "45f1a63160b4402b80ec3bf44662bff9"
+		}
+	],
+	"unsafe": {
+		"bindings": [
+			{
+				"name": "RATELIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1002",
+				"simple": {
+					"limit": 10,
+					"period": 60
+				}
+			}
+		]
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["Browser"]
+		}
+	]
+}
