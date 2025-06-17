@@ -19,17 +19,20 @@ export const html = `<!--
 		class="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 py-8">
 		<div class="max-w-4xl w-full">
 			<div class="flex flex-col items-center justify-center space-y-6">
-				<h1 class="text-4xl font-bold tracking-tight">Markdowner ⚡</h1>
+				<h1 class="text-4xl font-bold tracking-tight">Markdowner ⚡ <span class="text-2xl bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-md">v4</span></h1>
 				<p class="text-lg text-gray-600 dark:text-gray-400">
-					A fast open-source tool to convert any website into LLM-ready markdown data.
+					Modernized for Wrangler v4 and latest Cloudflare Workers patterns.
+				</p>
+				<p class="text-sm text-gray-500 dark:text-gray-500">
+					A fast tool to convert any website into LLM-ready markdown data.
 				</p>
 
-				<a href="https://github.com/dhravya/markdowner" class="underline underline-offset-4 hover:underline">
+				<a href="https://github.com/ahlstrominfo/markdowner" class="underline underline-offset-4 hover:underline">
 					<img src="https://pluspng.com/img-png/github-logo-png-white-github-11-icon-free-white-social-icons-256x256.png" alt="Github logo" width="40" height="40" />
 				</a>
 
 				<div class="text-sm text-gray-600 dark:text-gray-400">
-					Made with ❤️ by <a href="https://dhr.wtf">Dhravya Shah</a>
+					Wrangler v4 Edition • Original by <a href="https://dhr.wtf" class="underline">Dhravya Shah</a>
 				</div>
 				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md w-full p-6 space-y-4">
 					<script>

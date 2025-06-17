@@ -1,82 +1,146 @@
-# Markdowner ⚡📝
+# Markdowner ⚡ Wrangler v4 Edition
 
-A fast tool to convert any website into LLM-ready markdown data.
+A modernized fork of [Markdowner](https://github.com/dhravya/markdowner) by [Dhravya Shah](https://github.com/dhravya) - updated for Wrangler v4 and latest Cloudflare Workers patterns.
 
-## 👀 Why?
+**🚀 What's New in This Fork:**
+- ✅ Updated to Wrangler v4 with latest features  
+- ✅ Modern JSON configuration format
+- ✅ Strict TypeScript with zero compilation errors
+- ✅ Enhanced development safety with separate KV namespaces
+- ✅ Latest dependency versions and security updates
+- ✅ Comprehensive developer documentation
 
-I'm building an AI app called Supermemory - https://git.new/memory. Where users can store website content in the app and then query it using AI. One thing I noticed was - when data is structured and predictable (in markdown format), the LLM responses are _much_ better.
+## 📝 About
 
-There are other solutions available for this - https://r.jina.ai, https://firecrawl.dev, etc. But they are either:
+A fast tool to convert any website into LLM-ready markdown data, now modernized for the latest Cloudflare Workers ecosystem.
 
-- too expensive / proprietary
-- or too limited.
-- very difficult to deploy
-
-Here's a quote from my friend [@nexxeln](https://github.com/nexxeln)
-![what users think](https://i.dhr.wtf/r/Clipboard_May_9,_2024_at_12.35 AM.png)
-
-So naturally, we fix it ourselves ⚡
+Perfect for AI applications where structured markdown data improves LLM response quality significantly compared to raw HTML.
 
 ## Features 🚀
 
 - Convert any website into markdown
-- LLM Filtering
+- LLM Filtering with AI Workers
 - Detailed markdown mode
 - Auto Crawler (without sitemap!)
 - Text and JSON responses
-- Easy to self-host
-- ... All that and more, for FREE!
+- Easy to self-host on Cloudflare
+- Modern development experience with Wrangler v4
+- Type-safe development with strict TypeScript
 
 ## Usage
 
-To use the API, just make GET a request to https://md.dhr.wtf
+To use the API, make a GET request with a URL parameter:
 
-Usage example:
-
-```
-$ curl 'https://md.dhr.wtf/?url=https://example.com'
+```bash
+curl 'https://your-markdowner.your-subdomain.workers.dev/?url=https://example.com'
 ```
 
-##### _REQUIRED PARAMETERS_
+### Required Parameters
 
-url (string) -> The website URL to convert into markdown.
+- `url` (string) → The website URL to convert into markdown
 
-##### _OPTIONAL PARAMETERS_
+### Optional Parameters
 
-`enableDetailedResponse` (boolean: false) -> Toggle for detailed response with full HTML content.
-`crawlSubpages` (boolean: false) -> Crawl and return markdown for up to 10 subpages.
-`llmFilter` (boolean: false) -> Filter out unnecessary information using LLM.
+- `enableDetailedResponse` (boolean: false) → Include full HTML content instead of just article content
+- `crawlSubpages` (boolean: false) → Crawl and return markdown for up to 10 subpages
+- `llmFilter` (boolean: false) → Filter out unnecessary information using LLM
 
-##### _Response Types_
+### Response Types
 
-Add `Content-Type: text/plain` in headers for plain text response.
-Add `Content-Type: application/json` in headers for JSON response.
+- Add `Content-Type: text/plain` in headers for plain text response
+- Add `Content-Type: application/json` in headers for JSON response
 
-## Tech
+## Tech Stack
 
-Under the hood, Markdowner utilises Cloudflare's [Browser rendering](https://developers.cloudflare.com/browser-rendering/) and [Durable objects](https://developers.cloudflare.com/durable-objects/) to spin up browser instances and then convert it to markdown using Turndown.
+This modernized version uses:
 
-![Architecture diagram](https://i.dhr.wtf/r/Clipboard_May_9,_2024_at_12.25 AM.png)
+- **Cloudflare Workers** with Wrangler v4
+- **Browser Rendering API** for web scraping
+- **Durable Objects** for stateful browser management  
+- **KV Storage** for caching with separate dev/prod namespaces
+- **AI Workers** for content filtering
+- **TypeScript** with strict type checking
+- **Modern ES2022** syntax and patterns
 
-## Self hosting
+## Self Hosting
 
-You can easily self host this project. To use the browser rendering and Durable Objects, you need the [Workers paid plan](https://developers.cloudflare.com/workers-ai/platform/pricing/)
+You can easily self-host this modernized version. You'll need the [Workers paid plan](https://developers.cloudflare.com/workers-ai/platform/pricing/) for Browser Rendering and Durable Objects.
 
-1. Clone the repo and download dependencies
+### Prerequisites
 
-```
-git clone https://github.com/dhravya/markdowner
-npm i
-```
+- Node.js 18+
+- Cloudflare account with Workers paid plan
+- Git
 
-2. Run this command:
+### Setup
+
+1. **Clone this modernized fork:**
+   ```bash
+   git clone https://github.com/ahlstrominfo/markdowner
+   cd markdowner
    ```
-   npx wrangler kv:namespace create md_cache
+
+2. **Install dependencies:**
+   ```bash
+   npm install
    ```
-3. Open Wrangler.toml and change the IDs accordingly
-4. Run `npm run deploy`
-5. That's it 👍
+
+3. **Create KV namespaces:**
+   ```bash
+   npm run kv:create
+   npx wrangler kv namespace create md_cache --preview
+   ```
+
+4. **Update wrangler.json with your KV namespace IDs**
+
+5. **Deploy:**
+   ```bash
+   npm run deploy
+   ```
+
+### Development
+
+For local development with the modern setup:
+
+```bash
+# Start development server
+npm run dev
+
+# Type checking
+npm run lint
+
+# View logs
+npm run logs
+
+# Generate types
+npm run types
+```
+
+## Architecture
+
+The modernized architecture includes:
+
+- **Main Worker**: Modern export with proper TypeScript typing
+- **Browser Durable Object**: Manages browser instances with enhanced error handling
+- **Caching Layer**: KV storage with separate development and production namespaces
+- **Rate Limiting**: API protection with configurable limits
+- **AI Integration**: Optional LLM filtering for content cleanup
+
+## Credits & License
+
+This is a modernized fork of the excellent [Markdowner](https://github.com/dhravya/markdowner) originally created by [Dhravya Shah](https://github.com/dhravya).
+
+**Original Creator:** [Dhravya Shah](https://dhr.wtf)  
+**Modernization:** Updated for Wrangler v4 and latest Cloudflare Workers patterns
+
+Both the original and this fork are licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-Support me by simply starring this repository! ⭐
+- 🐛 **Issues**: Report bugs or request features in the [Issues](https://github.com/ahlstrominfo/markdowner/issues) section
+- 💡 **Original Project**: Check out the [original Markdowner](https://github.com/dhravya/markdowner) by Dhravya Shah
+- 📚 **Documentation**: See [CLAUDE.md](CLAUDE.md) for development guidance
+
+---
+
+⭐ **Star this repo** if the Wrangler v4 modernization helped you!
